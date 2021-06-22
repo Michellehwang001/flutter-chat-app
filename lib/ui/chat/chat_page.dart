@@ -3,7 +3,9 @@ import 'package:chat_app/repository/fake_repository.dart';
 import 'package:chat_app/repository/repository.dart';
 import 'package:chat_app/ui/chat/my_chat_item.dart';
 import 'package:chat_app/ui/chat/other_chat_item.dart';
+import 'package:chat_app/viewmodel/login_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ChatPage extends StatefulWidget {
   ChatPage({Key? key}) : super(key: key);
@@ -28,7 +30,7 @@ class _ChatPageState extends State<ChatPage> {
       appBar: AppBar(
         title: Text(''),
         actions: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.logout)),
+          IconButton(onPressed: () => context.read<LoginViewModel>().logout(), icon: Icon(Icons.logout)),
         ],
       ),
       body: SafeArea(
