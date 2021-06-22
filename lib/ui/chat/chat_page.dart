@@ -2,6 +2,7 @@ import 'package:chat_app/model/chat.dart';
 import 'package:chat_app/ui/chat/my_chat_item.dart';
 import 'package:chat_app/ui/chat/other_chat_item.dart';
 import 'package:chat_app/viewmodel/chat_view_model.dart';
+import 'package:chat_app/viewmodel/login_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -16,6 +17,7 @@ class _ChatPageState extends State<ChatPage> {
   final myEmail = 'bbb@aaa.com';
 
   final TextEditingController _controller = TextEditingController();
+  final _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -27,6 +29,7 @@ class _ChatPageState extends State<ChatPage> {
   @override
   void dispose() {
     _controller.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -38,7 +41,9 @@ class _ChatPageState extends State<ChatPage> {
       appBar: AppBar(
         title: Text(''),
         actions: [
-          IconButton(onPressed: () {}, icon: Icon(Icons.logout)),
+          IconButton(onPressed: () {
+            context.read<LoginViewModel>().logout();
+          }, icon: Icon(Icons.logout)),
         ],
       ),
       body: SafeArea(
@@ -48,6 +53,7 @@ class _ChatPageState extends State<ChatPage> {
               child: viewModel.isLoading
                   ? Center(child: CircularProgressIndicator())
                   : ListView.builder(
+                      controller: _scrollController,
                       shrinkWrap: true,
                       itemCount: viewModel.chatList.length,
                       itemBuilder: (context, index) {
@@ -101,6 +107,14 @@ class _ChatPageState extends State<ChatPage> {
                         viewModel.pushMessage(
                           myEmail,
                           _controller.text,
+                        );
+                        // 입력 창 초기화
+                        _controller.clear();
+                        // 스크롤 끝으로 이동
+                        _scrollController.animateTo(
+                          _scrollController.position.maxScrollExtent,
+                          duration: const Duration(milliseconds: 300),
+                          curve: Curves.easeOut,
                         );
                       },
                       child: Container(
