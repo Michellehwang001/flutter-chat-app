@@ -1,8 +1,7 @@
 import 'package:chat_app/model/chat.dart';
-import 'package:chat_app/repository/fake_repository.dart';
-import 'package:chat_app/repository/repository.dart';
 import 'package:chat_app/ui/chat/my_chat_item.dart';
 import 'package:chat_app/ui/chat/other_chat_item.dart';
+import 'package:chat_app/viewmodel/chat_view_model.dart';
 import 'package:chat_app/viewmodel/login_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -17,13 +16,14 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final myEmail = 'bbb@aaa.com';
 
-  final Repository repository = FakeRepository();
-
   final TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+
+    // provider로부터 데이터를 한번 읽어 온다.
+    context.read<ChatViewModel>().fetch();
   }
 
   @override
@@ -33,56 +33,38 @@ class _ChatPageState extends State<ChatPage> {
   }
 
   @override
-  void didUpdateWidget(covariant ChatPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    print('didUpdateWidget');
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    print('didChangeDependencies');
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<ChatViewModel>();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(''),
         actions: [
-          IconButton(onPressed: () => context.read<LoginViewModel>().logout(), icon: Icon(Icons.logout)),
+          IconButton(
+              onPressed: () => context.read<LoginViewModel>().logout(),
+              icon: Icon(Icons.logout)),
         ],
       ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: FutureBuilder<List<Chat>>(
-                  future: repository.getChatList(),
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    }
-
-                    if (!snapshot.hasData) {
-                      return Center(child: Text('데이터 없음'));
-                    }
-
-                    List<Chat> items = snapshot.data!;
-
-                    return ListView.builder(
+              child: viewModel.isLoading
+                  ? Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : ListView.builder(
                       shrinkWrap: true,
-                      itemCount: items.length,
+                      itemCount: viewModel.chatList.length,
                       itemBuilder: (context, index) {
-                        Chat chat = items[index];
+                        Chat chat = viewModel.chatList[index];
                         if (myEmail == chat.email) {
                           return MyChatItem(chat: chat);
                         } else {
                           return OtherChatItem(chat: chat);
                         }
                       },
-                    );
-                  }),
+                    ),
             ),
             Column(
               children: [
@@ -122,9 +104,9 @@ class _ChatPageState extends State<ChatPage> {
                     Flexible(child: Container()),
                     TextButton(
                       onPressed: () {
-                        repository.pushMessage(myEmail, _controller.text).whenComplete(() => {
-
-                        });
+                        viewModel.pushMessage(myEmail, _controller.text,
+                            DateTime.now().millisecond
+                        );
                       },
                       child: Container(
                         padding: const EdgeInsets.all(8),
