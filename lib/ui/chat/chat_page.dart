@@ -19,9 +19,29 @@ class _ChatPageState extends State<ChatPage> {
 
   final Repository repository = FakeRepository();
 
+  final TextEditingController _controller = TextEditingController();
+
   @override
   void initState() {
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  void didUpdateWidget(covariant ChatPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    print('didUpdateWidget');
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    print('didChangeDependencies');
   }
 
   @override
@@ -70,6 +90,7 @@ class _ChatPageState extends State<ChatPage> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextField(
+                    controller: _controller,
                     decoration: InputDecoration(
                       border: InputBorder.none,
                       labelText: 'Message를 입력하세요',
@@ -100,7 +121,11 @@ class _ChatPageState extends State<ChatPage> {
                     ),
                     Flexible(child: Container()),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        repository.pushMessage(myEmail, _controller.text).whenComplete(() => {
+
+                        });
+                      },
                       child: Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
