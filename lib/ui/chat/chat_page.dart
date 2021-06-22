@@ -1,13 +1,11 @@
 import 'package:chat_app/model/chat.dart';
-import 'package:chat_app/repository/fake_repository.dart';
-import 'package:chat_app/repository/firebase_repository.dart';
-import 'package:chat_app/repository/repository.dart';
 import 'package:chat_app/ui/chat/my_chat_item.dart';
 import 'package:chat_app/ui/chat/other_chat_item.dart';
+import 'package:chat_app/viewmodel/chat_view_model.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ChatPage extends StatefulWidget {
-
   ChatPage({Key? key}) : super(key: key);
 
   @override
@@ -17,15 +15,25 @@ class ChatPage extends StatefulWidget {
 class _ChatPageState extends State<ChatPage> {
   final myEmail = 'bbb@aaa.com';
 
-  final Repository repository = FakeRepository();
+  final TextEditingController _controller = TextEditingController();
 
   @override
   void initState() {
     super.initState();
+
+    context.read<ChatViewModel>().fetch();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = context.watch<ChatViewModel>();
+
     return Scaffold(
       appBar: AppBar(
         title: Text(''),
@@ -37,35 +45,80 @@ class _ChatPageState extends State<ChatPage> {
         child: Column(
           children: [
             Expanded(
-              child: FutureBuilder<List<Chat>>(
-                future: repository.getChatList(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  }
-
-                  if (!snapshot.hasData) {
-                    return Center(child: Text('데이터 없음'));
-                  }
-
-                  List<Chat> items = snapshot.data!;
-
-                  return ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: items.length,
-                    itemBuilder: (context, index) {
-                      Chat chat = items[index];
-                      if (myEmail == chat.email) {
-                        return MyChatItem(chat: chat);
-                      } else {
-                        return OtherChatItem(chat: chat);
-                      }
-                    },
-                  );
-                }
-              ),
+              child: viewModel.isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: viewModel.chatList.length,
+                      itemBuilder: (context, index) {
+                        Chat chat = viewModel.chatList[index];
+                        if (myEmail == chat.email) {
+                          return MyChatItem(chat: chat);
+                        } else {
+                          return OtherChatItem(chat: chat);
+                        }
+                      },
+                    ),
             ),
-            TextField(),
+            Column(
+              children: [
+                Divider(),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: TextField(
+                    controller: _controller,
+                    decoration: InputDecoration(
+                      border: InputBorder.none,
+                      labelText: 'Message를 입력하세요',
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: null,
+                      icon: Icon(Icons.email),
+                    ),
+                    IconButton(
+                      onPressed: null,
+                      icon: Icon(Icons.email),
+                    ),
+                    IconButton(
+                      onPressed: null,
+                      icon: Icon(Icons.email),
+                    ),
+                    IconButton(
+                      onPressed: null,
+                      icon: Icon(Icons.email),
+                    ),
+                    IconButton(
+                      onPressed: null,
+                      icon: Icon(Icons.email),
+                    ),
+                    Flexible(child: Container()),
+                    TextButton(
+                      onPressed: () {
+                        viewModel.pushMessage(
+                          myEmail,
+                          _controller.text,
+                        );
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.blue,
+                        ),
+                        child: Text(
+                          'SEND',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ],
         ),
       ),

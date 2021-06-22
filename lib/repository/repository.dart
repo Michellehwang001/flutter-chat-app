@@ -1,5 +1,5 @@
-import 'package:chat_app/model/chat.dart';
+abstract class Repository<T> {
+  Future<List<T>> getAll();
 
-abstract class Repository {
-  Future<List<Chat>> getChatList();
+  Future add(T item);
 }
