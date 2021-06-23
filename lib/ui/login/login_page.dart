@@ -1,4 +1,3 @@
-import 'package:chat_app/ui/chat/chat_page.dart';
 import 'package:chat_app/viewmodel/login_view_model.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
