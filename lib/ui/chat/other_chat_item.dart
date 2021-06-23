@@ -1,4 +1,5 @@
 import 'package:chat_app/model/chat.dart';
+import 'package:chat_app/util/date_util.dart';
 import 'package:flutter/material.dart';
 
 class OtherChatItem extends StatelessWidget {
@@ -18,7 +19,7 @@ class OtherChatItem extends StatelessWidget {
             backgroundImage: chat.profileUrl != null
                 ? NetworkImage(chat.profileUrl!)
                 : NetworkImage(
-                    'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8d/Suzy_at_Asia_Artist_Awards_red_carpet%2C_16_November_2016_02.jpg/250px-Suzy_at_Asia_Artist_Awards_red_carpet%2C_16_November_2016_02.jpg'),
+                    'http://ojsfile.ohmynews.com/STD_IMG_FILE/2012/0712/IE001463350_STD.jpg'),
           ),
           SizedBox(
             width: 16,
@@ -34,7 +35,7 @@ class OtherChatItem extends StatelessWidget {
                       style: TextStyle(fontWeight: FontWeight.w500),
                     ),
                     SizedBox(width: 8),
-                    Text(timeNow()),
+                    Text(dateMillisecondsToString(chat.time)),
                   ],
                 ),
                 Container(
@@ -54,18 +55,3 @@ class OtherChatItem extends StatelessWidget {
   }
 }
 
-String timeNow() {
-  String result;
-  if (TimeOfDay.now().hour > 12) {
-    result = (TimeOfDay.now().hour - 12).toString() +
-        ':' +
-        TimeOfDay.now().minute.toString() +
-        'PM';
-  } else {
-    result = TimeOfDay.now().hour.toString() +
-        ':' +
-        TimeOfDay.now().minute.toString() +
-        'AM';
-  }
-  return result;
-}

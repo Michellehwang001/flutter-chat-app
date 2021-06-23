@@ -35,7 +35,7 @@ class ChatViewModel extends ChangeNotifier{
         '황혜정',
         'https://yt3.ggpht.com/ytc/AAUvwniqTHfAb4NIjTwa5_G1BQmABidGaQ5SZc3AzOQF=s900-c-k-c0x00ffffff-no-rj',
         message,
-        time,
+        DateTime.now().millisecondsSinceEpoch,
         email,
       )
     ).whenComplete(() {
