@@ -6,18 +6,9 @@ String dateMillisecondsToString(int mills) {
   return DateFormat.jm().format(DateTime.fromMillisecondsSinceEpoch(mills));
 }
 
-String timeNow() {
-    String result;
-    if (TimeOfDay.now().hour > 12) {
-      result = (TimeOfDay.now().hour - 12).toString() +
-          ':' +
-          TimeOfDay.now().minute.toString() +
-          'PM';
-    } else {
-      result = TimeOfDay.now().hour.toString() +
-          ':' +
-          TimeOfDay.now().minute.toString() +
-          'AM';
-    }
-    return result;
+// 확장 함수 (확장 메소드)
+extension MyInt on int {
+  String toDateString() {
+    return DateFormat.jm().format(DateTime.fromMillisecondsSinceEpoch(this));
   }
+}
