@@ -54,4 +54,15 @@ class FirebaseUserRepository extends UserRepository {
     // Once signed in, return the UserCredential
     return await FirebaseAuth.instance.signInWithCredential(credential);
   }
+
+  @override
+  Stream<ChatUser?> authStateChanges() {
+    return FirebaseAuth.instance.authStateChanges().map((user) {
+      if (user != null) {
+        _user = ChatUser(user.email, user.photoURL, user.displayName);
+        return _user;
+      }
+      return null;
+    });
+  }
 }
