@@ -3,6 +3,7 @@ import 'package:chat_app/ui/chat/my_chat_item.dart';
 import 'package:chat_app/ui/chat/other_chat_item.dart';
 import 'package:chat_app/viewmodel/chat_view_model.dart';
 import 'package:chat_app/viewmodel/login_view_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -18,14 +19,6 @@ class _ChatPageState extends State<ChatPage> {
   final _scrollController = ScrollController();
 
   @override
-  void initState() {
-    super.initState();
-
-    context.read<ChatViewModel>()
-        .fetch();
-  }
-
-  @override
   void dispose() {
     _controller.dispose();
     _scrollController.dispose();
@@ -34,40 +27,59 @@ class _ChatPageState extends State<ChatPage> {
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = context.watch<ChatViewModel>();
+    final chatViewModel = context.watch<ChatViewModel>();
     final loginViewModel = context.watch<LoginViewModel>();
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(''),
+        centerTitle: true,
+        title: Text(
+          '생존코딩 단체방',
+          style: Theme.of(context).appBarTheme.titleTextStyle,
+        ),
         actions: [
           IconButton(
-              onPressed: () {
-                context.read<LoginViewModel>().logout();
-              },
-              icon: Icon(Icons.logout)),
+            onPressed: () {
+              context.read<LoginViewModel>().logout();
+            },
+            icon: Icon(Icons.logout),
+          ),
         ],
       ),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: viewModel.isLoading
-                  ? Center(child: CircularProgressIndicator())
-                  : ListView.builder(
-                      controller: _scrollController,
-                      shrinkWrap: true,
-                      itemCount: viewModel.chatList.length,
+              child: StreamBuilder<QuerySnapshot<Chat>>(
+                  stream: chatViewModel.getChatListStream(),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(snapshot.error.toString()),
+                      );
+                    }
+
+                    if (!snapshot.hasData) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+
+                    final data = snapshot.requireData;
+
+                    return ListView.builder(
+                      reverse: true,
+                      itemCount: data.size,
                       itemBuilder: (context, index) {
-                        Chat chat = viewModel.chatList[index];
-                        if (loginViewModel.user!.email ==
-                            chat.email) {
+                        Chat chat = data.docs[index].data();
+                        if (loginViewModel.user!.email == chat.email) {
                           return MyChatItem(chat: chat);
                         } else {
                           return OtherChatItem(chat: chat);
                         }
                       },
-                    ),
+                    );
+                  }),
             ),
             Column(
               children: [
@@ -107,12 +119,11 @@ class _ChatPageState extends State<ChatPage> {
                     Flexible(child: Container()),
                     TextButton(
                       onPressed: () async {
-                        await viewModel.pushMessage(_controller.text, loginViewModel.user!);
+                        await chatViewModel.pushMessage(
+                            _controller.text, loginViewModel.user!);
 
                         // 입력 창 초기화
                         _controller.clear();
-                        // 스크롤 끝으로 이동
-                        _scrollToBottom();
                       },
                       child: Container(
                         padding: const EdgeInsets.all(8),
@@ -133,14 +144,6 @@ class _ChatPageState extends State<ChatPage> {
           ],
         ),
       ),
-    );
-  }
-
-  void _scrollToBottom() {
-    _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeOut,
     );
   }
 }
