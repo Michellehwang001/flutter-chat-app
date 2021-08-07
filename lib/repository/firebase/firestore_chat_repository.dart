@@ -6,11 +6,11 @@ class FirestoreChatRepository {
 
   FirestoreChatRepository({FirebaseFirestore? firebaseFirestore})
       : _chatRef = (firebaseFirestore ?? FirebaseFirestore.instance)
-            .collection('messages')
-            .withConverter(
-              fromFirestore: (snapshot, _) => Chat.fromJson(snapshot.data()!),
-              toFirestore: (chat, _) => chat.toJson(),
-            );
+      .collection('messages')
+      .withConverter(
+    fromFirestore: (snapshot, _) => Chat.fromJson(snapshot.data()!),
+    toFirestore: (chat, _) => chat.toJson(),
+  );
 
   Future add(Chat item) async {
     await _chatRef.add(item);

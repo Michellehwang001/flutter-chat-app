@@ -83,7 +83,6 @@ Future<void> main() async {
   // final chatRepository = FirebaseChatRepository();
 
   final chatRepository = FirestoreChatRepository();
-
   // final userRepository = FakeUserRepository();
   // final chatRepository = FakeChatRepository();
 
